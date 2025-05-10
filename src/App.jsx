@@ -17,6 +17,7 @@ function App() {
     localStorage.getItem('darkMode') === 'true' || 
     window.matchMedia('(prefers-color-scheme: dark)').matches
   );
+  const location = useLocation();
 
   useEffect(() => {
     if (darkMode) {
@@ -29,13 +30,11 @@ function App() {
 
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
-  
-  const location = useLocation();
   };
 
   return (
+    <div>
       {/* Top Bar with logo and dark mode toggle */}
-      <header className="py-3 px-6 sm:px-8 md:px-12 bg-white dark:bg-surface-800 shadow-sm fixed top-0 left-0 right-0 z-10">
       <header className="py-4 px-6 sm:px-8 md:px-12 bg-white dark:bg-surface-800 shadow-sm fixed top-0 left-0 right-0 z-10">
         <div className="flex justify-between items-center max-w-7xl mx-auto">
           <motion.div 
@@ -44,8 +43,8 @@ function App() {
             transition={{ duration: 0.5 }}
             className="flex items-center"
           >
+            <h1 className="text-xl font-bold text-primary dark:text-primary-light">
               <NavLink to="/">Tododododo</NavLink>
-              Tododododo
             </h1>
           </motion.div>
           <motion.button
@@ -110,7 +109,6 @@ function App() {
         </div>
       </nav>
       </header>
-      <main className="pt-32 min-h-screen">
       <main className="pt-20 min-h-screen">
         <Routes>
           <Route path="/tasks" element={<Tasks />} />
