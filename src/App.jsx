@@ -3,13 +3,14 @@ import { Routes, Route, NavLink, useLocation } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { motion } from 'framer-motion';
-import { ListChecks, FolderKanban, Home as HomeIcon } from 'lucide-react';
+import { ListChecks, FolderKanban, Settings } from 'lucide-react';
 
 // Pages
 import Home from './pages/Home';
 import NotFound from './pages/NotFound';
 import Tasks from './pages/Tasks';
 import Projects from './pages/Projects';
+import SettingsPage from './pages/Settings';
 
 // Utility to control dark mode
 function App() {
@@ -79,16 +80,6 @@ function App() {
           <ul className="flex space-x-1">
             <li>
               <NavLink 
-                to="/" 
-                className={({ isActive }) => `flex items-center py-3 px-4 font-medium rounded-t-lg transition-colors ${isActive ? 'text-primary border-b-2 border-primary' : 'text-surface-600 dark:text-surface-300 hover:text-primary dark:hover:text-primary'}`}
-                end
-              >
-                <HomeIcon className="w-5 h-5 mr-2" />
-                Home
-              </NavLink>
-            </li>
-            <li>
-              <NavLink 
                 to="/tasks" 
                 className={({ isActive }) => `flex items-center py-3 px-4 font-medium rounded-t-lg transition-colors ${isActive ? 'text-primary border-b-2 border-primary' : 'text-surface-600 dark:text-surface-300 hover:text-primary dark:hover:text-primary'}`}
               >
@@ -105,6 +96,15 @@ function App() {
                 Projects
               </NavLink>
             </li>
+            <li>
+              <NavLink 
+                to="/settings" 
+                className={({ isActive }) => `flex items-center py-3 px-4 font-medium rounded-t-lg transition-colors ${isActive ? 'text-primary border-b-2 border-primary' : 'text-surface-600 dark:text-surface-300 hover:text-primary dark:hover:text-primary'}`}
+              >
+                <Settings className="w-5 h-5 mr-2" />
+                Settings
+              </NavLink>
+            </li>
           </ul>
         </div>
       </nav>
@@ -113,6 +113,7 @@ function App() {
         <Routes>
           <Route path="/tasks" element={<Tasks />} />
           <Route path="/projects" element={<Projects />} />
+          <Route path="/settings" element={<SettingsPage />} />
           <Route path="/" element={<Home />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
