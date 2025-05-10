@@ -39,7 +39,7 @@ function App() {
             className="flex items-center"
           >
             <h1 className="text-xl md:text-2xl font-bold text-primary">
-              TaskFlow
+              Tododododo
             </h1>
           </motion.div>
           <motion.button

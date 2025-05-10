@@ -25,7 +25,7 @@ const Home = () => {
       >
         <header className="mb-8 text-center">
           <h1 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-            Task Management Made Simple
+            Tododododo: Simple Task Management
           </h1>
           <p className="text-surface-600 dark:text-surface-300 text-lg max-w-2xl mx-auto">
             Keep track of your daily tasks with our intuitive interface. Add, organize, and complete tasks with ease.
