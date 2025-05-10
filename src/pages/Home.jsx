@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ListChecks, FolderKanban, Clock, ArrowRight } from 'lucide-react';
 import { toast } from 'react-toastify';
 import MainFeature from '../components/MainFeature';
+const Home = () => {
+  const [loading, setLoading] = useState(true);
   const [taskCount, setTaskCount] = useState(0);
   const [projectCount, setProjectCount] = useState(0);
   const [pendingTaskCount, setPendingTaskCount] = useState(0);
@@ -23,10 +25,47 @@ import MainFeature from '../components/MainFeature';
     } catch (error) {
       console.error('Error loading data from localStorage:', error);
     }
+
+    // Simulate loading data
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 800);
+    
+    return () => clearTimeout(timer);
   }, []);
 
-
-const Home = () => {
+  return (
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="max-w-4xl mx-auto"
+      >
+        <header className="mb-8 text-center">
+          <h1 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            Tododododo: Simple Task Management
+          </h1>
+          <p className="text-surface-600 dark:text-surface-300 text-lg max-w-2xl mx-auto">
+            Keep track of your daily tasks with our intuitive interface. Add, organize, and complete tasks with ease.
+          </p>
+        </header>
+        
+        <AnimatePresence>
+          {loading ? (
+            <motion.div 
+              className="flex justify-center items-center py-20"
+              initial={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="relative w-20 h-20">
+                <div className="absolute top-0 left-0 w-full h-full border-4 border-surface-200 dark:border-surface-700 rounded-full"></div>
+                <div className="absolute top-0 left-0 w-full h-full border-4 border-t-primary border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin"></div>
+              </div>
+            </motion.div>
+          ) : (
+            <>
       <motion.div 
         className="text-center mb-12"
         initial={{ opacity: 0, y: 20 }}
@@ -70,7 +109,6 @@ const Home = () => {
           <p className="text-surface-600 dark:text-surface-400 mb-4">Organize your tasks into projects to better track your progress.</p>
           <div className="text-3xl font-bold mb-6">{projectCount}</div>
           <Link to="/projects" className="mt-auto inline-flex items-center text-secondary font-medium hover:text-secondary-dark transition-colors">
-            Go to Projects <ArrowRight className="w-4 h-4 ml-1" />
           </Link>
         </motion.div>
     // Simulate loading data
@@ -102,50 +140,7 @@ const Home = () => {
           Use the navigation menu above to access your tasks and projects.
         </p>
       </motion.div>
-      setLoading(false);
-    }, 800);
-    
-    return () => clearTimeout(timer);
-  }, []);
-
-  return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="max-w-4xl mx-auto"
-      >
-        <header className="mb-8 text-center">
-          <h1 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-            Tododododo: Simple Task Management
-          </h1>
-          <p className="text-surface-600 dark:text-surface-300 text-lg max-w-2xl mx-auto">
-            Keep track of your daily tasks with our intuitive interface. Add, organize, and complete tasks with ease.
-          </p>
-        </header>
-        
-        <AnimatePresence>
-          {loading ? (
-            <motion.div 
-              className="flex justify-center items-center py-20"
-              initial={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <div className="relative w-20 h-20">
-                <div className="absolute top-0 left-0 w-full h-full border-4 border-surface-200 dark:border-surface-700 rounded-full"></div>
-                <div className="absolute top-0 left-0 w-full h-full border-4 border-t-primary border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin"></div>
-              </div>
-            </motion.div>
-          ) : (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
-              <MainFeature />
-            </motion.div>
+            </>
           )}
         </AnimatePresence>
       </motion.div>
