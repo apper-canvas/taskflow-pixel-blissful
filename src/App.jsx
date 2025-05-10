@@ -121,6 +121,9 @@ function AppLayout() {
         pauseOnHover
         theme={darkMode ? "dark" : "light"}
         toastClassName="rounded-xl shadow-card text-sm font-medium"
+      />
+    </div>
+  );
 }
 
 function App() {
@@ -128,9 +131,6 @@ function App() {
     <ThemeProvider>
       <AppLayout />
     </ThemeProvider>
-  );
-      />
-    </div>
   );
 }
 
