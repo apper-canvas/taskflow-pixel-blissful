@@ -14,6 +14,8 @@ const MainFeature = () => {
   const AlertCircleIcon = getIcon('AlertCircle');
   const XIcon = getIcon('X');
   const FilterIcon = getIcon('Filter');
+  const FolderIcon = getIcon('Folder');
+  const FoldersIcon = getIcon('Folders');
   const TagIcon = getIcon('Tag');
   const CalendarIcon = getIcon('Calendar');
   
@@ -28,15 +30,53 @@ const MainFeature = () => {
     }
   });
   
+  // Initialize projects from localStorage or use default projects
+  const [projects, setProjects] = useState(() => {
+    try {
+      const savedProjects = localStorage.getItem('projects');
+      if (savedProjects) {
+        return JSON.parse(savedProjects);
+      } else {
+        // Create default projects
+        const defaultProjects = [
+          { id: 'default', name: 'General', color: 'bg-primary' }
+        ];
+        localStorage.setItem('projects', JSON.stringify(defaultProjects));
+        return defaultProjects;
+      }
+    } catch (error) {
+      console.error('Error loading projects from localStorage:', error);
+      return [{ id: 'default', name: 'General', color: 'bg-primary' }];
+    }
+  });
+
   // State for form inputs
   const [taskTitle, setTaskTitle] = useState('');
   const [taskDescription, setTaskDescription] = useState('');
   const [taskPriority, setTaskPriority] = useState('medium');
   const [taskDueDate, setTaskDueDate] = useState('');
+  const [taskProject, setTaskProject] = useState('default');
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterPriority, setFilterPriority] = useState('all');
+  const [filterProject, setFilterProject] = useState('all');
   const [editingTask, setEditingTask] = useState(null);
   const [isFormValid, setIsFormValid] = useState(false);
+
+  // Project management state
+  const [showProjectForm, setShowProjectForm] = useState(false);
+  const [newProjectName, setNewProjectName] = useState('');
+  const [newProjectColor, setNewProjectColor] = useState('bg-primary');
+  const [editingProject, setEditingProject] = useState(null);
+
+  // Project colors
+  const projectColors = [
+    { name: 'Maroon', value: 'bg-primary' },
+    { name: 'Green', value: 'bg-secondary' },
+    { name: 'Orange', value: 'bg-accent' },
+    { name: 'Blue', value: 'bg-blue-600' },
+    { name: 'Purple', value: 'bg-purple-600' },
+    { name: 'Teal', value: 'bg-teal-600' }
+  ];
   
   // Update localStorage when tasks change
   useEffect(() => {
@@ -48,12 +88,22 @@ const MainFeature = () => {
     setIsFormValid(taskTitle.trim().length > 0);
   }, [taskTitle]);
   
+  // Update localStorage when projects change
+  useEffect(() => {
+    localStorage.setItem('projects', JSON.stringify(projects));
+  }, [projects]);
+  
   // Filter tasks based on status and priority
   const filteredTasks = tasks.filter(task => {
     const statusMatch = filterStatus === 'all' || task.status === filterStatus;
     const priorityMatch = filterPriority === 'all' || task.priority === filterPriority;
-    return statusMatch && priorityMatch;
+    const projectMatch = filterProject === 'all' || task.projectId === filterProject;
+    return statusMatch && priorityMatch && projectMatch;
   });
+
+  // Get project by ID
+  const getProjectById = (projectId) =>
+    projects.find(p => p.id === projectId) || projects[0];
   
   // Add a new task
   const handleAddTask = (e) => {
@@ -71,6 +121,7 @@ const MainFeature = () => {
       status: 'pending',
       priority: taskPriority,
       dueDate: taskDueDate,
+      projectId: taskProject,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -82,6 +133,7 @@ const MainFeature = () => {
     setTaskDescription('');
     setTaskPriority('medium');
     setTaskDueDate('');
+    setTaskProject('default');
     
     toast.success("Task added successfully!");
   };
@@ -93,6 +145,7 @@ const MainFeature = () => {
     setTaskDescription(task.description || '');
     setTaskPriority(task.priority);
     setTaskDueDate(task.dueDate || '');
+    setTaskProject(task.projectId || 'default');
   };
   
   // Update an existing task
@@ -111,6 +164,7 @@ const MainFeature = () => {
           title: taskTitle.trim(),
           description: taskDescription.trim(),
           priority: taskPriority,
+          projectId: taskProject,
           dueDate: taskDueDate,
           updatedAt: new Date().toISOString(),
         };
@@ -126,6 +180,7 @@ const MainFeature = () => {
     setTaskDescription('');
     setTaskPriority('medium');
     setTaskDueDate('');
+    setTaskProject('default');
     
     toast.success("Task updated successfully!");
   };
@@ -137,6 +192,7 @@ const MainFeature = () => {
     setTaskDescription('');
     setTaskPriority('medium');
     setTaskDueDate('');
+    setTaskProject('default');
   };
   
   // Toggle task status
@@ -186,6 +242,87 @@ const MainFeature = () => {
       return dateString;
     }
   };
+
+  // Add a new project
+  const handleAddProject = (e) => {
+    e.preventDefault();
+    if (!newProjectName.trim()) {
+      toast.error("Project name is required");
+      return;
+    }
+
+    const projectId = editingProject 
+      ? editingProject.id 
+      : Date.now().toString();
+    
+    if (editingProject) {
+      // Update existing project
+      const updatedProjects = projects.map(project => 
+        project.id === editingProject.id 
+          ? { ...project, name: newProjectName.trim(), color: newProjectColor }
+          : project
+      );
+      setProjects(updatedProjects);
+      toast.success("Project updated successfully!");
+    } else {
+      // Create new project
+      const newProject = {
+        id: projectId,
+        name: newProjectName.trim(),
+        color: newProjectColor,
+        createdAt: new Date().toISOString()
+      };
+      setProjects([...projects, newProject]);
+      toast.success("Project created successfully!");
+    }
+
+    // Reset project form
+    setNewProjectName('');
+    setNewProjectColor('bg-primary');
+    setEditingProject(null);
+    setShowProjectForm(false);
+  };
+
+  // Start editing a project
+  const handleEditProject = (project) => {
+    setEditingProject(project);
+    setNewProjectName(project.name);
+    setNewProjectColor(project.color || 'bg-primary');
+    setShowProjectForm(true);
+  };
+
+  // Delete a project and reassign tasks
+  const handleDeleteProject = (projectId) => {
+    // Don't allow deleting the default project
+    if (projectId === 'default') {
+      toast.error("Cannot delete the default project");
+      return;
+    }
+
+    // Remove the project
+    setProjects(projects.filter(p => p.id !== projectId));
+    
+    // Reassign tasks from this project to the default project
+    const updatedTasks = tasks.map(task => {
+      if (task.projectId === projectId) {
+        return {
+          ...task,
+          projectId: 'default',
+          updatedAt: new Date().toISOString()
+        };
+      }
+      return task;
+    });
+    
+    setTasks(updatedTasks);
+    toast.info("Project deleted and tasks reassigned");
+  };
+  
+  // Cancel project editing
+  const handleCancelProjectEdit = () => {
+    setShowProjectForm(false);
+    setEditingProject(null);
+  };
   
   return (
     <div className="space-y-8">
@@ -225,6 +362,27 @@ const MainFeature = () => {
                 className="input"
                 required
               />
+            </div>
+
+            <div>
+              <label htmlFor="taskProject" className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1">
+                Project
+              </label>
+              <div className="relative">
+                <select
+                  id="taskProject"
+                  value={taskProject}
+                  onChange={(e) => setTaskProject(e.target.value)}
+                  className="input pl-10"
+                >
+                  {projects.map(project => (
+                    <option key={project.id} value={project.id}>{project.name}</option>
+                  ))}
+                </select>
+                <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+                  <FolderIcon className="w-5 h-5 text-primary" />
+                </div>
+              </div>
             </div>
             
             <div>
@@ -297,6 +455,116 @@ const MainFeature = () => {
         </div>
       </motion.div>
       
+      {/* Project Management */}
+      <motion.div
+        className="bg-white dark:bg-surface-800 rounded-2xl shadow-card"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.1 }}
+      >
+        <div className="p-6">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-semibold flex items-center">
+              <FoldersIcon className="w-5 h-5 mr-2 text-primary" />
+              Projects
+            </h2>
+            <button
+              onClick={() => setShowProjectForm(!showProjectForm)}
+              className="btn btn-outline flex items-center"
+            >
+              {showProjectForm ? (
+                <>
+                  <XIcon className="w-4 h-4 mr-1" />
+                  Cancel
+                </>
+              ) : (
+                <>
+                  <PlusIcon className="w-4 h-4 mr-1" />
+                  New Project
+                </>
+              )}
+            </button>
+          </div>
+
+          {showProjectForm && (
+            <form onSubmit={handleAddProject} className="mb-6 p-4 bg-surface-50 dark:bg-surface-700/30 rounded-xl">
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="projectName" className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1">
+                    Project Name*
+                  </label>
+                  <input
+                    id="projectName"
+                    type="text"
+                    value={newProjectName}
+                    onChange={(e) => setNewProjectName(e.target.value)}
+                    placeholder="Enter project name"
+                    className="input"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="projectColor" className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1">
+                    Color
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {projectColors.map(color => (
+                      <button
+                        key={color.value}
+                        type="button"
+                        onClick={() => setNewProjectColor(color.value)}
+                        className={`w-8 h-8 rounded-full ${color.value} ${
+                          newProjectColor === color.value ? 'ring-2 ring-offset-2 ring-surface-900 dark:ring-white' : ''
+                        }`}
+                        title={color.name}
+                      />
+                    ))}
+                  </div>
+                </div>
+                
+                <div className="flex justify-end gap-2 mt-2">
+                  <button type="button" onClick={handleCancelProjectEdit} className="btn btn-outline">Cancel</button>
+                  <button type="submit" className="btn btn-primary">{editingProject ? 'Update' : 'Create'} Project</button>
+                </div>
+              </div>
+            </form>
+          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {projects.map(project => (
+              <div key={project.id} className="bg-surface-50 dark:bg-surface-700/30 rounded-xl p-4 relative group">
+                <div className="flex items-center">
+                  <div className={`w-4 h-4 rounded-full ${project.color} mr-2`}></div>
+                  <h3 className="font-medium truncate flex-1">{project.name}</h3>
+                  
+                  {project.id !== 'default' && (
+                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button 
+                        onClick={() => handleEditProject(project)}
+                        className="p-1.5 rounded-full hover:bg-surface-200 dark:hover:bg-surface-600"
+                      >
+                        <EditIcon className="w-3.5 h-3.5" />
+                      </button>
+                      <button 
+                        onClick={() => handleDeleteProject(project.id)}
+                        className="p-1.5 rounded-full hover:bg-red-100 dark:hover:bg-red-900/30"
+                      >
+                        <TrashIcon className="w-3.5 h-3.5 text-red-600 dark:text-red-400" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="text-xs text-surface-500 dark:text-surface-400 mt-1">
+                  {tasks.filter(task => task.projectId === project.id).length} tasks
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </motion.div>
+      
       {/* Filters and Task List */}
       <motion.div
         className="space-y-6"
@@ -332,6 +600,17 @@ const MainFeature = () => {
                 <option value="low">Low Priority</option>
                 <option value="medium">Medium Priority</option>
                 <option value="high">High Priority</option>
+              
+              <select
+                value={filterProject}
+                onChange={(e) => setFilterProject(e.target.value)}
+                className="rounded-lg border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 px-3 py-1.5 text-sm"
+              >
+                <option value="all">All Projects</option>
+                {projects.map(project => (
+                  <option key={project.id} value={project.id}>{project.name}</option>
+                ))}
+              </select>
               </select>
             </div>
           </div>
@@ -414,6 +693,15 @@ const MainFeature = () => {
                               <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPriorityStyle(task.priority)}`}>
                                 <TagIcon className="w-3 h-3 mr-1" />
                                 {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
+
+                              {task.projectId && (
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-white dark:bg-surface-700 border border-surface-200 dark:border-surface-600">
+                                  <div className="flex items-center">
+                                    <div className={`w-2 h-2 rounded-full ${getProjectById(task.projectId).color} mr-1`}></div>
+                                    <span>{getProjectById(task.projectId).name}</span>
+                                  </div>
+                                </span>
+                              )}
                               </span>
                               
                               {task.dueDate && (
