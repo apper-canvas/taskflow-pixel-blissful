@@ -1,111 +1,116 @@
-import { useState } from 'react';
+--- /dev/null
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Sun, Moon, Bell, User, Shield, Save } from 'lucide-react';
+import { Sun, Moon, Laptop, Check } from 'lucide-react';
 import { toast } from 'react-toastify';
+import { useTheme, THEMES } from '../contexts/ThemeContext';
 
 const Settings = () => {
-  const [darkMode, setDarkMode] = useState(
-    localStorage.getItem('darkMode') === 'true' || 
-    window.matchMedia('(prefers-color-scheme: dark)').matches
-  );
-  
-  const [notifications, setNotifications] = useState(true);
-  const [username, setUsername] = useState('User');
-  
-  const handleSaveSettings = () => {
-    // Here you would save settings to localStorage or a backend
-    toast.success("Settings saved successfully!");
+  const { theme, setTheme } = useTheme();
+  const [selectedTheme, setSelectedTheme] = useState(theme);
+
+  // Update selected theme when global theme changes
+  useEffect(() => {
+    setSelectedTheme(theme);
+  }, [theme]);
+
+  const handleThemeChange = (newTheme) => {
+    setSelectedTheme(newTheme);
   };
-  
+
+  const saveThemeSettings = () => {
+    setTheme(selectedTheme);
+    toast.success('Theme settings saved successfully!');
+  };
+
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="container mx-auto px-4 py-8 max-w-4xl">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="max-w-4xl mx-auto"
+        transition={{ duration: 0.3 }}
       >
-        <header className="mb-8">
-          <h1 className="text-3xl font-bold text-primary mb-4">Settings</h1>
-          <p className="text-surface-600 dark:text-surface-400">
-            Customize your Tododododo experience with these settings options.
+        <h1 className="text-2xl font-bold mb-6">Settings</h1>
+
+        <div className="card mb-8">
+          <h2 className="text-xl font-semibold mb-4">Theme Preferences</h2>
+          <p className="text-surface-600 dark:text-surface-400 mb-6">
+            Choose how Tododododo appears to you. Select a theme preference below.
           </p>
-        </header>
-        
-        <div className="grid grid-cols-1 gap-6 mb-8">
-          {/* User Preferences */}
-          <motion.div 
-            className="bg-white dark:bg-surface-800 rounded-xl shadow-card p-6"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.1 }}
-          >
-            <div className="flex items-center mb-4">
-              <User className="w-5 h-5 mr-2 text-primary" />
-              <h2 className="text-xl font-semibold">User Preferences</h2>
-            </div>
-            
-            <div className="space-y-4">
-              <div>
-                <label htmlFor="username" className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1">
-                  Username
-                </label>
-                <input 
-                  type="text" 
-                  id="username" 
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="input"
-                />
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            {/* Light Theme Option */}
+            <div 
+              className={`relative rounded-xl border-2 p-4 cursor-pointer transition-all ${
+                selectedTheme === THEMES.LIGHT 
+                  ? 'border-primary bg-primary/5' 
+                  : 'border-surface-200 dark:border-surface-700 hover:border-primary/30'
+              }`}
+              onClick={() => handleThemeChange(THEMES.LIGHT)}
+            >
+              {selectedTheme === THEMES.LIGHT && (
+                <div className="absolute top-2 right-2 text-primary">
+                  <Check size={16} />
+                </div>
+              )}
+              <div className="flex flex-col items-center p-4">
+                <Sun className="w-8 h-8 mb-3 text-yellow-500" />
+                <h3 className="font-medium">Light</h3>
+                <p className="text-sm text-center mt-2 text-surface-500 dark:text-surface-400">
+                  Always use light mode
+                </p>
               </div>
             </div>
-          </motion.div>
-          
-          {/* Theme Settings */}
-          <motion.div 
-            className="bg-white dark:bg-surface-800 rounded-xl shadow-card p-6"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.2 }}
-          >
-            <div className="flex items-center mb-4">
-              {darkMode ? <Moon className="w-5 h-5 mr-2 text-primary" /> : <Sun className="w-5 h-5 mr-2 text-primary" />}
-              <h2 className="text-xl font-semibold">Theme</h2>
+
+            {/* Dark Theme Option */}
+            <div 
+              className={`relative rounded-xl border-2 p-4 cursor-pointer transition-all ${
+                selectedTheme === THEMES.DARK 
+                  ? 'border-primary bg-primary/5' 
+                  : 'border-surface-200 dark:border-surface-700 hover:border-primary/30'
+              }`}
+              onClick={() => handleThemeChange(THEMES.DARK)}
+            >
+              {selectedTheme === THEMES.DARK && (
+                <div className="absolute top-2 right-2 text-primary">
+                  <Check size={16} />
+                </div>
+              )}
+              <div className="flex flex-col items-center p-4">
+                <Moon className="w-8 h-8 mb-3 text-blue-400" />
+                <h3 className="font-medium">Dark</h3>
+                <p className="text-sm text-center mt-2 text-surface-500 dark:text-surface-400">
+                  Always use dark mode
+                </p>
+              </div>
             </div>
-            
-            <div className="flex items-center">
-              <label className="inline-flex items-center cursor-pointer">
-                <input 
-                  type="checkbox" 
-                  checked={darkMode} 
-                  onChange={() => setDarkMode(!darkMode)}
-                  className="sr-only peer" 
-                />
-                <div className="relative w-11 h-6 bg-surface-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer dark:bg-surface-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-surface-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-surface-600 peer-checked:bg-primary"></div>
-                <span className="ml-3 text-sm font-medium text-surface-700 dark:text-surface-300">
-                  {darkMode ? 'Dark Mode' : 'Light Mode'}
-                </span>
-              </label>
+
+            {/* System Theme Option */}
+            <div 
+              className={`relative rounded-xl border-2 p-4 cursor-pointer transition-all ${
+                selectedTheme === THEMES.SYSTEM 
+                  ? 'border-primary bg-primary/5' 
+                  : 'border-surface-200 dark:border-surface-700 hover:border-primary/30'
+              }`}
+              onClick={() => handleThemeChange(THEMES.SYSTEM)}
+            >
+              {selectedTheme === THEMES.SYSTEM && (
+                <div className="absolute top-2 right-2 text-primary">
+                  <Check size={16} />
+                </div>
+              )}
+              <div className="flex flex-col items-center p-4">
+                <Laptop className="w-8 h-8 mb-3 text-purple-500" />
+                <h3 className="font-medium">System</h3>
+                <p className="text-sm text-center mt-2 text-surface-500 dark:text-surface-400">
+                  Match system theme
+                </p>
+              </div>
             </div>
-          </motion.div>
-          
-          {/* Notification Settings */}
-          <motion.div 
-            className="bg-white dark:bg-surface-800 rounded-xl shadow-card p-6"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.3 }}
-          >
-            <div className="flex items-center mb-4">
-              <Bell className="w-5 h-5 mr-2 text-primary" />
-              <h2 className="text-xl font-semibold">Notifications</h2>
-            </div>
-          </motion.div>
+          </div>
+
+          <button onClick={saveThemeSettings} className="btn btn-primary">Save Theme Settings</button>
         </div>
-        
-        <button onClick={handleSaveSettings} className="btn btn-primary flex items-center">
-          <Save className="w-4 h-4 mr-2" /> Save Settings
-        </button>
       </motion.div>
     </div>
   );
