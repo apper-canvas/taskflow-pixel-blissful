@@ -1,9 +1,8 @@
-import { useEffect } from 'react';
-import { Routes, Route, NavLink } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Routes, Route, NavLink, useLocation } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { motion } from 'framer-motion';
-import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import { ListChecks, FolderKanban, Settings } from 'lucide-react';
 
 // Pages
@@ -13,104 +12,28 @@ import Tasks from './pages/Tasks';
 import Projects from './pages/Projects';
 import SettingsPage from './pages/Settings';
 
-function AppContent() {
-  const { isDarkMode } = useTheme();
+// Utility to control dark mode
+function App() {
+  const [darkMode, setDarkMode] = useState(
+    localStorage.getItem('darkMode') === 'true' || 
+    window.matchMedia('(prefers-color-scheme: dark)').matches
+  );
+  const location = useLocation();
 
   useEffect(() => {
-    // You can add initialization logic here if needed
-    const greeting = "Welcome to Tododododo!";
-    console.log(greeting);
-  }, []);
-  
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    localStorage.setItem('darkMode', darkMode);
+  }, [darkMode]);
+
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
+  };
+
   return (
-    <div>
-      {/* Top Bar with logo */}
-      <header className="py-4 px-6 sm:px-8 md:px-12 bg-white dark:bg-surface-800 shadow-sm fixed top-0 left-0 right-0 z-10">
-        <div className="flex justify-between items-center max-w-7xl mx-auto">
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5 }}
-            className="flex items-center"
-          >
-            <h1 className="text-xl font-bold text-primary dark:text-primary-light">
-              <NavLink to="/">Tododododo</NavLink>
-            </h1>
-          </motion.div>
-        </div>
-      
-      {/* Navigation Menu */}
-      <nav className="fixed top-[60px] left-0 right-0 z-10 bg-white dark:bg-surface-800 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 sm:px-8 md:px-12">
-          <ul className="flex space-x-1">
-            <li>
-              <NavLink 
-                to="/tasks" 
-                className={({ isActive }) => `flex items-center py-3 px-4 font-medium rounded-t-lg transition-colors ${isActive ? 'text-primary border-b-2 border-primary' : 'text-surface-600 dark:text-surface-300 hover:text-primary dark:hover:text-primary'}`}
-              >
-                <ListChecks className="w-5 h-5 mr-2" />
-                Tasks
-              </NavLink>
-            </li>
-            <li>
-              <NavLink 
-                to="/projects" 
-                className={({ isActive }) => `flex items-center py-3 px-4 font-medium rounded-t-lg transition-colors ${isActive ? 'text-primary border-b-2 border-primary' : 'text-surface-600 dark:text-surface-300 hover:text-primary dark:hover:text-primary'}`}
-              >
-                <FolderKanban className="w-5 h-5 mr-2" />
-                Projects
-              </NavLink>
-            </li>
-            <li>
-              <NavLink 
-                to="/settings" 
-                className={({ isActive }) => `flex items-center py-3 px-4 font-medium rounded-t-lg transition-colors ${isActive ? 'text-primary border-b-2 border-primary' : 'text-surface-600 dark:text-surface-300 hover:text-primary dark:hover:text-primary'}`}
-              >
-                <Settings className="w-5 h-5 mr-2" />
-                Settings
-              </NavLink>
-            </li>
-          </ul>
-        </div>
-      </nav>
-      </header>
-      <main className="pt-20 min-h-screen">
-        <Routes>
-          <Route path="/tasks" element={<Tasks />} />
-          <Route path="/projects" element={<Projects />} />
-          <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/" element={<Home />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </main>
-      
-      <ToastContainer
-        position="bottom-right"
-        autoClose={4000}
-        hideProgressBar={false}
-        newestOnTop
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme={isDarkMode ? "dark" : "light"}
-        toastClassName="rounded-xl shadow-card text-sm font-medium"
-      />
-    </div>
-  );
-}
-
-function App() {
-  return (
-    <ThemeProvider>
-      <AppContent />
-    </ThemeProvider>
-  );
-}
-
-export default App;
-
     <div>
       {/* Top Bar with logo and dark mode toggle */}
       <header className="py-4 px-6 sm:px-8 md:px-12 bg-white dark:bg-surface-800 shadow-sm fixed top-0 left-0 right-0 z-10">
